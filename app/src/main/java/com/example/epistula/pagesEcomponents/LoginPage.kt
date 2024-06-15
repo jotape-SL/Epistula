@@ -1,4 +1,4 @@
-package com.example.epistula.pages
+package com.example.epistula.pagesEcomponents
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image

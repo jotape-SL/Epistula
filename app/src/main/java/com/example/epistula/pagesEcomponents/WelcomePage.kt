@@ -1,4 +1,4 @@
-package com.example.epistula.pages
+package com.example.epistula.pagesEcomponents
 import com.example.epistula.R
 
 import androidx.compose.foundation.Image

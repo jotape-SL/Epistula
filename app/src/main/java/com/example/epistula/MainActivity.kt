@@ -10,9 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.epistula.pages.HomePage
-import com.example.epistula.pages.LoginPage
-import com.example.epistula.pages.WelcomePage
+import com.example.epistula.db.AppDataBase
+import com.example.epistula.pagesEcomponents.CalendarPage
+import com.example.epistula.pagesEcomponents.HomePage
+import com.example.epistula.pagesEcomponents.LoginPage
+import com.example.epistula.pagesEcomponents.WelcomePage
 import com.example.epistula.ui.theme.EpistulaTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,12 +28,14 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
+                    val lembreteDao = AppDataBase.getDataBase(this).lembreteDao()
                     NavHost(
                         navController = navController,
-                        startDestination = "home" ){
+                        startDestination = "calendario" ){
                         composable(route = "login"){ LoginPage(navController) }
                         composable(route = "bemvindo" ){ WelcomePage(navController) }
                         composable(route = "home"){ HomePage(navController) }
+                        composable(route = "calendario"){ CalendarPage(navController, lembreteDao) }
                 }
             }
         }

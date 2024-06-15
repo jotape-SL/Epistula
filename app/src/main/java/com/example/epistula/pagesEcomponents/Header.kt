@@ -48,8 +48,8 @@ fun DrawerContent(navController: NavController) {
     ) {
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_person_white,
-            textoBotao = "Perfil"
+            imagemDrawable = R.drawable.icon_home,
+            textoBotao = "Home"
         )
         Divider(
             color = Color.Gray,
@@ -163,7 +163,7 @@ fun ItemMenuDrawer(navController: NavController, rota  : String = "home", imagem
 @Composable
 fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("Todos os emails") }
+    //var selectedText by remember { mutableStateOf("Todos os emails") }
     val options = listOf("Todos os emails", "Lidos", "Não lidos", "Spam")
 
     Row(
@@ -213,7 +213,7 @@ fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(selectedText, color = Color.White)
+                Text(filter, color = Color.White)
                 androidx.compose.material3.Icon(
                     painter = painterResource(id = R.drawable.icon_arrow),
                     contentDescription = "Arrow Down",

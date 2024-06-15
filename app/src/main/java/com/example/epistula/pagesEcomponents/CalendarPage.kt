@@ -105,9 +105,6 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
 
                     }
                 }
-
-                // Filters Row
-                CustomButtonsWithDropdown()
                 LaunchedEffect(Unit){
                     lembretes = lembreteDao.getAll()
                 }

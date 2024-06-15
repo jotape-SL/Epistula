@@ -161,7 +161,7 @@ fun ItemMenuDrawer(navController: NavController, rota  : String = "home", imagem
 }
 
 @Composable
-fun CustomButtonsWithDropdown() {
+fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     var selectedText by remember { mutableStateOf("Todos os emails") }
     val options = listOf("Todos os emails", "Lidos", "Não lidos", "Spam")
@@ -205,7 +205,6 @@ fun CustomButtonsWithDropdown() {
             Spacer(modifier = Modifier.width(4.dp))
             Text("Filtros", color = Color.White)
         }
-
         Box(
             modifier = Modifier.weight(1f)
         ) {
@@ -228,13 +227,13 @@ fun CustomButtonsWithDropdown() {
                 modifier = Modifier
                     .background(Color.DarkGray)
                     .fillMaxWidth(.45f)
-                    .border(.5.dp, Color.White, shape= RoundedCornerShape(5.dp))
+                    .border(.5.dp, Color.White, shape = RoundedCornerShape(5.dp))
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(text = option, color = Color.White)},
+                        text = { Text(text = option, color = Color.White) },
                         onClick = {
-                            selectedText = option
+                            onFilterSelected(option)
                             expanded = false
                         })
                 }

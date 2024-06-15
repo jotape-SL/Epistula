@@ -42,6 +42,15 @@ fun HomePage(navController: NavController) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
+    // Lista de emails
+    val emails = listOf(
+        Email("Remetente 1", "Título 1", "Lorem ipsum dolor sit amet", "11/06/2024", "13:42", "Lido"),
+        Email("Remetente 2", "Título 2", "Consectetur adipiscing elit", "11/06/2024", "14:42", "Não lido"),
+        Email("Remetente 3", "Título 3", "Sed do eiusmod tempor", "12/06/2024", "10:00", "Spam")
+    )
+    var filteredEmails by remember { mutableStateOf(emails) }
+    var filter by remember { mutableStateOf("Todos os emails") }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -109,7 +118,18 @@ fun HomePage(navController: NavController) {
                 }
 
                 // Filters Row
-                CustomButtonsWithDropdown()
+                CustomButtonsWithDropdown(filter) { selectedFilter ->
+                    filter = selectedFilter
+                    filteredEmails = emails.filter {
+                        when (filter) {
+                            "Todos os emails" -> true
+                            "Lidos" -> it.status == "Lido"
+                            "Não lidos" -> it.status == "Não lido"
+                            "Spam" -> it.status == "Spam"
+                            else -> true
+                        }
+                    }
+                }
 
                 // Email List
                 LazyColumn(
@@ -117,8 +137,8 @@ fun HomePage(navController: NavController) {
                         .fillMaxSize()
                         .padding(8.dp)
                 ) {
-                    items(2) { index ->
-                        EmailItem()
+                    items(filteredEmails.size) { index ->
+                        EmailItem(filteredEmails[index])
                         Divider(color = Color(0xFF272727), thickness = 1.dp)
                     }
                 }
@@ -127,8 +147,17 @@ fun HomePage(navController: NavController) {
     )
 }
 
+data class Email(
+    val remetente: String,
+    val title: String,
+    val desc: String,
+    val date: String,
+    val time: String,
+    val status: String
+)
+
 @Composable
-fun EmailItem() {
+fun EmailItem(email: Email) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,10 +179,10 @@ fun EmailItem() {
                 .weight(1f)
                 .padding(horizontal = 8.dp)
         ) {
-            Text("Remetente", fontWeight = FontWeight.Bold, color = Color.White)
-            Text("Título email", fontWeight = FontWeight.Bold, color = Color.White)
+            Text(email.remetente, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(email.title, fontWeight = FontWeight.Bold, color = Color.White)
             Text(
-                "Lorem ipsum dolor sit amet consectetur...",
+                email.desc,
                 color = Color.Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -163,8 +192,8 @@ fun EmailItem() {
         Column(
             horizontalAlignment = Alignment.End
         ) {
-            Text("11/06/2024", color = Color.Gray, fontSize = 12.sp)
-            Text("às 13:42", color = Color.Gray, fontSize = 12.sp)
+            Text(email.date, color = Color.Gray, fontSize = 12.sp)
+            Text(email.time, color = Color.Gray, fontSize = 12.sp)
         }
     }
 }

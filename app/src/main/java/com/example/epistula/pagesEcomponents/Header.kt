@@ -48,8 +48,8 @@ fun DrawerContent(navController: NavController) {
     ) {
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_person_white,
-            textoBotao = "Perfil"
+            imagemDrawable = R.drawable.icon_home,
+            textoBotao = "Home"
         )
         Divider(
             color = Color.Gray,
@@ -161,9 +161,9 @@ fun ItemMenuDrawer(navController: NavController, rota  : String = "home", imagem
 }
 
 @Composable
-fun CustomButtonsWithDropdown() {
+fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("Todos os emails") }
+    //var selectedText by remember { mutableStateOf("Todos os emails") }
     val options = listOf("Todos os emails", "Lidos", "Não lidos", "Spam")
 
     Row(
@@ -205,7 +205,6 @@ fun CustomButtonsWithDropdown() {
             Spacer(modifier = Modifier.width(4.dp))
             Text("Filtros", color = Color.White)
         }
-
         Box(
             modifier = Modifier.weight(1f)
         ) {
@@ -214,7 +213,7 @@ fun CustomButtonsWithDropdown() {
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(selectedText, color = Color.White)
+                Text(filter, color = Color.White)
                 androidx.compose.material3.Icon(
                     painter = painterResource(id = R.drawable.icon_arrow),
                     contentDescription = "Arrow Down",
@@ -228,13 +227,13 @@ fun CustomButtonsWithDropdown() {
                 modifier = Modifier
                     .background(Color.DarkGray)
                     .fillMaxWidth(.45f)
-                    .border(.5.dp, Color.White, shape= RoundedCornerShape(5.dp))
+                    .border(.5.dp, Color.White, shape = RoundedCornerShape(5.dp))
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(text = option, color = Color.White)},
+                        text = { Text(text = option, color = Color.White) },
                         onClick = {
-                            selectedText = option
+                            onFilterSelected(option)
                             expanded = false
                         })
                 }

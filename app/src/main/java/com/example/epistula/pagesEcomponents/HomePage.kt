@@ -23,8 +23,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -33,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.*
 import com.example.epistula.R
-import com.example.epistula.ui.theme.fontFamily
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -238,10 +235,10 @@ fun EmailItem(email: Email, onFavorite: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .border(1.dp, Color(0x4DFFFFFF), shape = RoundedCornerShape(10.dp))
+                .border(1.dp, Color(0xFF000000), shape = RoundedCornerShape(10.dp))
         ) {
             Image(
-                painter = painterResource(id = R.drawable.eye),
+                painter = painterResource(id = R.drawable.eye_d),
                 contentDescription = "Email Icon",
                 modifier = Modifier.size(48.dp)
             )

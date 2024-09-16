@@ -1,5 +1,7 @@
 package com.example.epistula.pagesEcomponents
 
+import android.app.Activity
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -29,20 +31,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.epistula.R
+import com.example.epistula.ui.theme.*
 import com.example.epistula.ui.theme.fontFamily
 
 @Composable
 fun DrawerContent(navController: NavController) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val backgroundColor = if (currentTheme == "dark") DarkGray else LightGray
+
     Column(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .fillMaxHeight()
-            .background(Color(0xFF393939))
+            .background(backgroundColor)
             .padding(vertical = 70.dp, horizontal = 20.dp),
         horizontalAlignment = Alignment.Start
     ) {
@@ -59,7 +68,13 @@ fun DrawerContent(navController: NavController) {
         ItemMenuDrawer(
             navController = navController,
             imagemDrawable = R.drawable.icon_brush,
-            textoBotao = "Personalização"
+            textoBotao = "Personalização",
+            onClick = {
+                val newTheme = if (currentTheme == "light") "dark" else "light"
+                sharedPreferences.edit().putString("app_theme", newTheme).apply()
+
+                (context as? Activity)?.recreate()
+            }
         )
         Divider(
             color = Color.Gray,
@@ -133,9 +148,12 @@ fun DrawerContent(navController: NavController) {
 }
 
 @Composable
-fun ItemMenuDrawer(navController: NavController, rota  : String = "home", imagemDrawable : Int, textoBotao : String){
+fun ItemMenuDrawer(navController: NavController, rota  : String = "home", imagemDrawable : Int, textoBotao : String,  onClick: (() -> Unit)? = null){
     Button(
-        onClick = { navController.navigate(rota) },
+        onClick = {
+            onClick?.invoke()
+            navController.navigate(rota)
+        },
         colors = ButtonDefaults.buttonColors(Color.Transparent),
         modifier = Modifier
             .fillMaxWidth()

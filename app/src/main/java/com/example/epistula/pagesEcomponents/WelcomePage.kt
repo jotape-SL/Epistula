@@ -1,4 +1,5 @@
 package com.example.epistula.pagesEcomponents
+import android.content.Context
 import com.example.epistula.R
 
 import androidx.compose.foundation.Image
@@ -9,10 +10,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -21,14 +27,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.epistula.ui.theme.DarkGray
+import com.example.epistula.ui.theme.DarkGray80
+import com.example.epistula.ui.theme.LightGray
 import com.example.epistula.ui.theme.fontFamily
 
 @Composable
 fun WelcomePage(navController: NavController) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") Color.White else DarkGray
+    val eye = if (currentTheme == "dark") R.drawable.eye_d else R.drawable.eye_l
+    val stars = if (currentTheme == "dark") R.drawable.estrelas_d else R.drawable.estrelas_l
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF333333))
+            .background(majorColors)
     ) {
         // Background placeholder
         BackgroundStars()
@@ -47,7 +63,7 @@ fun WelcomePage(navController: NavController) {
             Text(
                 text = "Transforme sua experiência com e-mails. \n" +
                         "Com Epistula, leia e organize suas mensagens de forma inteligente e eficiente.\n\n" + "Bem-vindo a um novo nível de produtividade.",
-                color = Color.White,
+                color = textColors,
                 fontSize = 20.sp,
                 fontFamily = fontFamily,
                 fontWeight = FontWeight.Normal,
@@ -60,11 +76,11 @@ fun WelcomePage(navController: NavController) {
             Button(
                 onClick = { navController.navigate("login")},
                 shape = RoundedCornerShape(15),
-                colors = ButtonDefaults.buttonColors(Color.Gray)
+                colors = ButtonDefaults.buttonColors(DarkGray80)
             ) {
                 Text(
                     text = "Entrar",
-                    color = Color.Black,
+                    color = LightGray,
                     fontSize = 25.sp ,
                     fontFamily = fontFamily,
                     fontWeight = FontWeight.Bold,
@@ -79,8 +95,12 @@ fun WelcomePage(navController: NavController) {
 
 @Composable
 fun BackgroundStars() {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    val currentTheme = sharedPreferences.getString("app_theme", "light")
+    val stars = if (currentTheme == "dark") R.drawable.estrelas_d else R.drawable.estrelas_l
     Image(
-        painter = painterResource(id = R.drawable.estrelas),
+        painter = painterResource(id = stars),
         contentDescription = null,
         modifier = Modifier.fillMaxSize(),
         contentScale = ContentScale.Crop
@@ -89,9 +109,12 @@ fun BackgroundStars() {
 
 @Composable
 fun ImageEye() {
-    // Placeholder for the eye image
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    val currentTheme = sharedPreferences.getString("app_theme", "light")
+    val eye = if (currentTheme == "dark") R.drawable.eye_d else R.drawable.eye_l
     Image(
-        painter = painterResource(id = R.drawable.eye),
+        painter = painterResource(id = eye),
         contentDescription = "Partly Cloudy",
         modifier = Modifier
             .size(240.dp),

@@ -19,10 +19,10 @@ import com.example.epistula.ui.theme.EpistulaTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        loadAppTheme()
         super.onCreate(savedInstanceState)
         setContent {
             EpistulaTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -41,4 +41,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+    fun setAppTheme(theme: String) {
+        val editor = getSharedPreferences("AppPrefs", MODE_PRIVATE).edit()
+        editor.putString("app_theme", theme)
+        editor.apply()
+    }
+    private fun loadAppTheme() {
+        val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+        val currentTheme = sharedPreferences.getString("app_theme", "light")
+
+        if (currentTheme == "dark") {
+            setTheme(R.style.Theme_Epistula_Dark)
+        } else {
+            setTheme(R.style.Theme_Epistula_Light)
+        }
+    }
 }

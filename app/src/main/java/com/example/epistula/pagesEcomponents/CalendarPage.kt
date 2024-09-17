@@ -1,5 +1,6 @@
 package com.example.epistula.pagesEcomponents
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,19 +18,34 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.epistula.R
 import com.example.epistula.model.Lembrete
 import com.example.epistula.dao.LembreteDao
+import com.example.epistula.db.AppDataBase
+import com.example.epistula.ui.theme.DarkGray
+import com.example.epistula.ui.theme.LightGray
 import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val menu = if (currentTheme == "dark") R.drawable.icon_menu_d else R.drawable.icon_menu_l
+    val avatar = if (currentTheme == "dark") R.drawable.icon_person_d else R.drawable.icon_person_l
+
     var lembretes by remember { mutableStateOf(listOf<Lembrete>())}
     var showDialog by remember { mutableStateOf(false)}
     var pesquisa by rememberSaveable { mutableStateOf("") }
@@ -47,11 +63,11 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF333333))
+                    .background(majorColors)
             ) {
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFA8A8A8))
+                        .background(textColors)
                         .padding(horizontal = 10.dp, vertical = 0.dp)
                 ) {
                     Row(
@@ -64,10 +80,12 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
                         IconButton(onClick = {
                             scope.launch {
                                 drawerState.open()
-                            } }) {
+                            }
+                        }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_menu_d),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = menu),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
@@ -78,13 +96,13 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
                             onValueChange = { pesquisa = it },
                             placeholder = {
                                 if (pesquisa.isEmpty()) {
-                                    Text(placeholderPesquisa, color = Color.Black)
+                                    Text(placeholderPesquisa, color = majorColors)
                                 }
                             },
                             modifier = Modifier
                                 .weight(1f),
                             colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color(0xFFA7A7A7),
+                                containerColor = textColors,
                                 cursorColor = Color.Black,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
@@ -96,8 +114,9 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
 
                         IconButton(onClick = { /* TODO: Menu click */ }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_person_d),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = avatar),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
@@ -109,7 +128,7 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF333333))
+                        .background(majorColors)
                         .padding(top = 16.dp)
                 ){
 
@@ -117,14 +136,14 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
 
                     Button(
                         shape = RoundedCornerShape(15),
-                        colors = ButtonDefaults.buttonColors(Color.Gray),
+                        colors = ButtonDefaults.buttonColors(textColors),
                         onClick = {showDialog = true},
                         modifier = Modifier
                             .padding(end = 16.dp, bottom = 48.dp)
                             .align(Alignment.BottomEnd)
                     ) {
                         Text(text = "Adicionar Lembrete",
-                            color = Color.White,
+                            color = majorColors,
                             modifier = Modifier.padding(vertical = 8.dp),
                             fontSize = 20.sp)
                     }
@@ -151,26 +170,34 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
 
 @Composable
 fun ListaLembretes(lembretes: List<Lembrete>){
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
     LazyColumn (
         modifier = Modifier
             .fillMaxSize()
     ){
         items(lembretes){
                 lembrete -> LembreteItem(lembrete)
-            Divider(color = Color.LightGray, thickness = 1.dp)
+            Divider(color = textColors, thickness = 1.dp)
         }
     }
 }
 
 @Composable
 fun LembreteItem(lembrete: Lembrete) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
     Column(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
     ) {
-        Text(text = lembrete.titulo, style = MaterialTheme.typography.titleMedium, color = Color.White)
-        Text(text = lembrete.data, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+        Text(text = lembrete.titulo, style = MaterialTheme.typography.titleMedium, color = textColors)
+        Text(text = lembrete.data, style = MaterialTheme.typography.bodyMedium, color = textColors)
     }
 }
 
@@ -180,6 +207,11 @@ fun AlertaAdd(
     onConfirm: () -> Unit,
     lembreteDao: LembreteDao
 ){
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val textColors = if (currentTheme == "dark") DarkGray else LightGray
+    val majorColors = if (currentTheme == "dark") LightGray else DarkGray
     var titulo by remember { mutableStateOf("")}
     var data by remember { mutableStateOf("")}
 
@@ -211,7 +243,7 @@ fun AlertaAdd(
         confirmButton = {
             Button(
                 shape = RoundedCornerShape(15),
-                colors = ButtonDefaults.buttonColors(Color.Gray),
+                colors = ButtonDefaults.buttonColors(majorColors),
                 onClick = {
                     val novoLembrete = Lembrete(
                         data = data,
@@ -224,7 +256,7 @@ fun AlertaAdd(
                 }
             ) {
                 Text(text ="Adicionar",
-                    color = Color.White,
+                    color = textColors,
                     modifier = Modifier.padding(vertical = 8.dp),
                     fontSize = 20.sp)
             }
@@ -236,7 +268,7 @@ fun AlertaAdd(
                 onClick = { onDismissRequest() }
             ) {
                 Text("Cancelar",
-                    color = Color.White,
+                    color = textColors,
                     modifier = Modifier.padding(vertical = 8.dp),
                     fontSize = 20.sp)
             }

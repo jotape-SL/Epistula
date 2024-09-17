@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     val lembreteDao = AppDataBase.getDataBase(this).lembreteDao()
                     NavHost(
                         navController = navController,
-                        startDestination = "bemvindo" ){
+                        startDestination = "calendario" ){
                         composable(route = "login"){ LoginPage(navController) }
                         composable(route = "bemvindo" ){ WelcomePage(navController) }
                         composable(route = "home"){ HomePage(navController) }

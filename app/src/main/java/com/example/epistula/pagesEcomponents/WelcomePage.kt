@@ -39,8 +39,6 @@ fun WelcomePage(navController: NavController) {
     var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
     val majorColors = if (currentTheme == "dark") DarkGray else LightGray
     val textColors = if (currentTheme == "dark") Color.White else DarkGray
-    val eye = if (currentTheme == "dark") R.drawable.eye_d else R.drawable.eye_l
-    val stars = if (currentTheme == "dark") R.drawable.estrelas_d else R.drawable.estrelas_l
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -76,11 +74,11 @@ fun WelcomePage(navController: NavController) {
             Button(
                 onClick = { navController.navigate("login")},
                 shape = RoundedCornerShape(15),
-                colors = ButtonDefaults.buttonColors(DarkGray80)
+                colors = ButtonDefaults.buttonColors(textColors)
             ) {
                 Text(
                     text = "Entrar",
-                    color = LightGray,
+                    color = majorColors,
                     fontSize = 25.sp ,
                     fontFamily = fontFamily,
                     fontWeight = FontWeight.Bold,

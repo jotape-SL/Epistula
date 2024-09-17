@@ -45,30 +45,39 @@ fun DrawerContent(navController: NavController) {
     val context = LocalContext.current
     val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
     var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
-    val backgroundColor = if (currentTheme == "dark") DarkGray else LightGray
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val textoModo = if (currentTheme == "dark") "Modo escuro" else "Modo claro"
+    val home = if (currentTheme == "dark") R.drawable.icon_home_d else R.drawable.icon_home_l
+    val mode = if (currentTheme == "dark") R.drawable.icon_night_mode else R.drawable.icon_light_mode
+    val bell = if (currentTheme == "dark") R.drawable.icon_notifications_d else R.drawable.icon_notifications_l
+    val calendar = if (currentTheme == "dark") R.drawable.icon_calendar_d else R.drawable.icon_calendar_l
+    val lock = if (currentTheme == "dark") R.drawable.icon_lock_d else R.drawable.icon_lock_l
+    val help = if (currentTheme == "dark") R.drawable.icon_help_d else R.drawable.icon_help_l
+    val more = if (currentTheme == "dark") R.drawable.icon_more_d else R.drawable.icon_more_l
 
     Column(
         modifier = Modifier
             .fillMaxWidth(0.9f)
             .fillMaxHeight()
-            .background(backgroundColor)
+            .background(majorColors)
             .padding(vertical = 70.dp, horizontal = 20.dp),
         horizontalAlignment = Alignment.Start
     ) {
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_home,
+            imagemDrawable = home,
             textoBotao = "Home"
         )
         Divider(
-            color = Color.Gray,
+            color = textColors,
             modifier = Modifier
                 .height(2.dp)
         )
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_brush,
-            textoBotao = "Personalização",
+            imagemDrawable = mode,
+            textoBotao = textoModo,
             onClick = {
                 val newTheme = if (currentTheme == "light") "dark" else "light"
                 sharedPreferences.edit().putString("app_theme", newTheme).apply()
@@ -77,68 +86,68 @@ fun DrawerContent(navController: NavController) {
             }
         )
         Divider(
-            color = Color.Gray,
+            color = textColors,
             modifier = Modifier
                 .height(2.dp)
         )
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_notifications,
+            imagemDrawable = bell,
             textoBotao = "Notificações"
         )
         Divider(
-            color = Color.Gray,
+            color = textColors,
             modifier = Modifier
                 .height(2.dp)
         )
         ItemMenuDrawer(
             navController = navController,
             rota = "calendario",
-            imagemDrawable = R.drawable.icon_calendar,
+            imagemDrawable = calendar,
             textoBotao = "Calendario"
         )
         Divider(
-            color = Color.Gray,
+            color = textColors,
             modifier = Modifier
                 .height(2.dp)
         )
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_lock,
+            imagemDrawable = lock,
             textoBotao = "Segurança"
         )
         Divider(
-            color = Color.Gray,
+            color = textColors,
             modifier = Modifier
                 .height(2.dp)
         )
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_help,
+            imagemDrawable = help,
             textoBotao = "Ajuda"
         )
         Divider(
-            color = Color.Gray,
+            color = textColors,
             modifier = Modifier
                 .height(2.dp)
         )
         ItemMenuDrawer(
             navController = navController,
-            imagemDrawable = R.drawable.icon_more,
-            textoBotao = "Mais Configurações"
+            imagemDrawable = more,
+            textoBotao = "Mais Configurações",
         )
         Spacer(modifier = Modifier.height(70.dp))
         Button(
             onClick = { navController.navigate("login")},
             shape = RoundedCornerShape(15),
-            colors = ButtonDefaults.buttonColors(Color.Gray),
+            colors = ButtonDefaults.buttonColors(textColors),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 60.dp)
         ) {
             Text(
                 text = "Sair",
-                color = Color.White,
+                color = majorColors,
                 modifier = Modifier.padding(vertical = 8.dp),
                 fontSize = 20.sp,
                 fontFamily = fontFamily
@@ -149,6 +158,10 @@ fun DrawerContent(navController: NavController) {
 
 @Composable
 fun ItemMenuDrawer(navController: NavController, rota  : String = "home", imagemDrawable : Int, textoBotao : String,  onClick: (() -> Unit)? = null){
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
     Button(
         onClick = {
             onClick?.invoke()
@@ -168,7 +181,7 @@ fun ItemMenuDrawer(navController: NavController, rota  : String = "home", imagem
 
             Text(
                 text = textoBotao,
-                color = Color.White,
+                color = textColors,
                 fontSize = 18.sp,
                 modifier = Modifier.padding( horizontal = 30.dp, vertical = 15.dp),
                 fontFamily = fontFamily,

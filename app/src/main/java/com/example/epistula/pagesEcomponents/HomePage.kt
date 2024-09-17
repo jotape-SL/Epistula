@@ -1,5 +1,6 @@
 package com.example.epistula.pagesEcomponents
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,7 +31,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import com.example.epistula.R
+import com.example.epistula.ui.theme.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -66,6 +69,15 @@ fun HomePage(navController: NavController) {
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val menu = if (currentTheme == "dark") R.drawable.icon_menu_d else R.drawable.icon_menu_l
+    val avatar = if (currentTheme == "dark") R.drawable.icon_person_d else R.drawable.icon_person_l
+
     fun updateFilteredEmails() {
         filteredEmails = emails.filter {
             (filter == "Todos os emails" || it.status == filter) &&
@@ -91,11 +103,11 @@ fun HomePage(navController: NavController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF333333))
+                    .background(majorColors)
             ) {
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFA8A8A8))
+                        .background(textColors)
                         .padding(horizontal = 10.dp, vertical = 0.dp)
                 ) {
                     Row(
@@ -111,8 +123,9 @@ fun HomePage(navController: NavController) {
                             }
                         }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_menu),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = menu),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
@@ -123,13 +136,13 @@ fun HomePage(navController: NavController) {
                             onValueChange = { pesquisa = it },
                             placeholder = {
                                 if (pesquisa.isEmpty()) {
-                                    Text(placeholderPesquisa, color = Color.Black)
+                                    Text(placeholderPesquisa, color = majorColors)
                                 }
                             },
                             modifier = Modifier
                                 .weight(1f),
                             colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color(0xFFA7A7A7),
+                                containerColor = textColors,
                                 cursorColor = Color.Black,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
@@ -141,8 +154,9 @@ fun HomePage(navController: NavController) {
 
                         IconButton(onClick = { /* TODO: Menu click */ }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_person),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = avatar),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
@@ -178,7 +192,7 @@ fun HomePage(navController: NavController) {
                                 showSnackbar = true
                             }
                         )
-                        Divider(color = Color(0xFF272727), thickness = 1.dp)
+                        Divider(color = textColors, thickness = 1.dp)
                     }
                 }
             }
@@ -226,6 +240,15 @@ data class Email(
 
 @Composable
 fun EmailItem(email: Email, onFavorite: () -> Unit) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val eye = if (currentTheme == "dark") R.drawable.eye_d else R.drawable.eye_l
+    val arrw = if (currentTheme == "dark") R.drawable.icon_arrow_d else R.drawable.icon_arrow_l
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -235,10 +258,10 @@ fun EmailItem(email: Email, onFavorite: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .border(1.dp, Color(0xFF000000), shape = RoundedCornerShape(10.dp))
+                .border(1.dp, textColors, shape = RoundedCornerShape(10.dp))
         ) {
             Image(
-                painter = painterResource(id = R.drawable.eye_d),
+                painter = painterResource(id = eye),
                 contentDescription = "Email Icon",
                 modifier = Modifier.size(48.dp)
             )
@@ -248,11 +271,11 @@ fun EmailItem(email: Email, onFavorite: () -> Unit) {
                 .weight(1f)
                 .padding(horizontal = 8.dp)
         ) {
-            Text(email.remetente, fontWeight = FontWeight.Bold, color = Color.White)
-            Text(email.title, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(email.remetente, fontWeight = FontWeight.Bold, color = textColors)
+            Text(email.title, fontWeight = FontWeight.Bold, color = textColors)
             Text(
                 email.desc,
-                color = Color.Gray,
+                color = textColors,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -261,8 +284,8 @@ fun EmailItem(email: Email, onFavorite: () -> Unit) {
         Column(
             horizontalAlignment = Alignment.End
         ) {
-            Text(email.date, color = Color.Gray, fontSize = 12.sp)
-            Text(email.time, color = Color.Gray, fontSize = 12.sp)
+            Text(email.date, color = textColors, fontSize = 12.sp)
+            Text(email.time, color = textColors, fontSize = 12.sp)
         }
     }
 }

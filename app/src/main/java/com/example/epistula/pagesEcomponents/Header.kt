@@ -184,6 +184,14 @@ fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit
     //var selectedText by remember { mutableStateOf("Todos os emails") }
     val options = listOf("Todos os emails", "Lidos", "Não lidos", "Spam")
 
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val filtro = if (currentTheme == "dark") R.drawable.icon_filter_d else R.drawable.icon_filter_l
+    val arrow = if (currentTheme == "dark") R.drawable.icon_arrow_d else R.drawable.icon_arrow_l
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -192,7 +200,7 @@ fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit
                 val strokeWidth = 2.dp.toPx()
                 val y = size.height - strokeWidth / 2
                 drawLine(
-                    color = Color(0xFF272727),
+                    color = textColors,
                     start = Offset(0f, y),
                     end = Offset(size.width, y),
                     strokeWidth = strokeWidth
@@ -208,7 +216,7 @@ fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit
                     val strokeWidth = 2.dp.toPx()
                     val x = size.width - strokeWidth / 2
                     drawLine(
-                        color = Color(0xFF272727),
+                        color = textColors,
                         start = Offset(x, 0f),
                         end = Offset(x, size.height),
                         strokeWidth = strokeWidth
@@ -216,12 +224,12 @@ fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit
                 }
         ) {
             androidx.compose.material3.Icon(
-                painter = painterResource(id = R.drawable.icon_filter),
+                painter = painterResource(id = filtro),
                 contentDescription = "Filtros",
-                tint = Color.White
+                tint = textColors
             )
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Filtros", color = Color.White)
+            Text("Filtros", color = textColors)
         }
         Box(
             modifier = Modifier.weight(1f)
@@ -231,11 +239,11 @@ fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(filter, color = Color.White)
+                Text(filter, color = textColors)
                 androidx.compose.material3.Icon(
-                    painter = painterResource(id = R.drawable.icon_arrow),
+                    painter = painterResource(id = arrow),
                     contentDescription = "Arrow Down",
-                    tint = Color.White
+                    tint = textColors
                 )
             }
 
@@ -243,13 +251,13 @@ fun CustomButtonsWithDropdown(filter: String, onFilterSelected: (String) -> Unit
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
                 modifier = Modifier
-                    .background(Color.DarkGray)
+                    .background(textColors)
                     .fillMaxWidth(.45f)
-                    .border(.5.dp, Color.White, shape = RoundedCornerShape(5.dp))
+                    .border(.5.dp, textColors, shape = RoundedCornerShape(5.dp))
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        text = { Text(text = option, color = Color.White) },
+                        text = { Text(text = option, color = textColors) },
                         onClick = {
                             onFilterSelected(option)
                             expanded = false

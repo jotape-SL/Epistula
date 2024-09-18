@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Epistula" parent="android:Theme.Material.Light.NoActionBar" />
+    <!-- Tema Claro -->
+    <style name="Theme.Epistula.Light" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@color/colorDark</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+
+    <!-- Tema Escuro -->
+    <style name="Theme.Epistula.Dark" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/colorLight</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
 </resources>

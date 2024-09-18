@@ -1,13 +1,14 @@
 package com.example.epistula.pagesEcomponents
 
+import android.content.Context
+import android.content.Intent
+import android.provider.CalendarContract
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -24,21 +26,37 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.epistula.R
-import com.example.epistula.model.Lembrete
-import com.example.epistula.dao.LembreteDao
+import com.example.epistula.ui.theme.DarkGray
+import com.example.epistula.ui.theme.LightGray
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
-    var lembretes by remember { mutableStateOf(listOf<Lembrete>())}
-    var showDialog by remember { mutableStateOf(false)}
-    var pesquisa by rememberSaveable { mutableStateOf("") }
+fun CalendarPage(navController: NavController) {
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val menu = if (currentTheme == "dark") R.drawable.icon_menu_d else R.drawable.icon_menu_l
+    val avatar = if (currentTheme == "dark") R.drawable.icon_person_d else R.drawable.icon_person_l
+
     val placeholderPesquisa = "Pesquisar"
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val coroutineScope = rememberCoroutineScope()
+
+    var pesquisa by rememberSaveable { mutableStateOf("") }
+    var eventTitle by rememberSaveable { mutableStateOf("")}
+    var eventDescription by rememberSaveable{ mutableStateOf("")}
+    var eventLocation by rememberSaveable{ mutableStateOf("")}
+    var eventDate by rememberSaveable{ mutableStateOf("")}
+    var eventStartTime by rememberSaveable{ mutableStateOf("")}
+    var eventEndTime by rememberSaveable{ mutableStateOf("")}
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -49,11 +67,11 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF333333))
+                    .background(majorColors)
             ) {
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFA8A8A8))
+                        .background(textColors)
                         .padding(horizontal = 10.dp, vertical = 0.dp)
                 ) {
                     Row(
@@ -66,10 +84,12 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
                         IconButton(onClick = {
                             scope.launch {
                                 drawerState.open()
-                            } }) {
+                            }
+                        }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_menu),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = menu),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
@@ -80,13 +100,13 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
                             onValueChange = { pesquisa = it },
                             placeholder = {
                                 if (pesquisa.isEmpty()) {
-                                    Text(placeholderPesquisa, color = Color.Black)
+                                    Text(placeholderPesquisa, color = majorColors)
                                 }
                             },
                             modifier = Modifier
                                 .weight(1f),
                             colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color(0xFFA7A7A7),
+                                containerColor = textColors,
                                 cursorColor = Color.Black,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
@@ -98,150 +118,122 @@ fun CalendarPage(navController: NavController, lembreteDao: LembreteDao) {
 
                         IconButton(onClick = { /* TODO: Menu click */ }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_person),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = avatar),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
                     }
                 }
-                LaunchedEffect(Unit){
-                    lembretes = lembreteDao.getAll()
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(0xFF333333))
-                        .padding(top = 16.dp)
-                ){
-
-
-
-                    Button(
-                        shape = RoundedCornerShape(15),
-                        colors = ButtonDefaults.buttonColors(Color.Gray),
-                        onClick = {showDialog = true},
-                        modifier = Modifier
-                            .padding(end = 16.dp, bottom = 48.dp)
-                            .align(Alignment.BottomEnd)
-                    ) {
-                        Text(text = "Adicionar Lembrete",
-                            color = Color.White,
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            fontSize = 20.sp)
-                    }
-                }
-                if(showDialog){
-                    AlertaAdd(
-                        onDismissRequest = {showDialog = false},
-                        onConfirm = {
-                            showDialog = false
-                            coroutineScope.launch {
-                                lembretes = lembreteDao.getAll()
+                Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    value = eventTitle,
+                    onValueChange = {eventTitle = it},
+                    label = { Text("Título do Evento")},
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color(0xFFFFFFFF),
+                        focusedIndicatorColor = majorColors
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = eventDescription,
+                    onValueChange = {eventDescription = it},
+                    label = { Text("Descrição do Evento")},
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color(0xFFFFFFFF),
+                        focusedIndicatorColor = Color(0xFF464646)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = eventLocation,
+                    onValueChange = {eventLocation = it},
+                    label = { Text("Local do Evento")},
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color(0xFFFFFFFF),
+                        focusedIndicatorColor = Color(0xFF464646)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = eventDate,
+                    onValueChange = {eventDate = it},
+                    label = { Text("Data do Evento")},
+                    placeholder = { Text(" dd/MM/yyyy")},
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color(0xFFFFFFFF),
+                        focusedIndicatorColor = Color(0xFF464646)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = eventStartTime,
+                    onValueChange = {eventStartTime = it},
+                    label = { Text("Horário de Início do Evento")},
+                    placeholder = { Text(" HH:mm")},
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color(0xFFFFFFFF),
+                        focusedIndicatorColor = Color(0xFF464646)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                TextField(
+                    value = eventEndTime,
+                    onValueChange = {eventEndTime = it},
+                    label = { Text("Horário de Término do Evento")},
+                    placeholder = { Text(" HH:mm")},
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color(0xFFFFFFFF),
+                        focusedIndicatorColor = Color(0xFF464646)
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    shape = RoundedCornerShape(15),
+                    colors = ButtonDefaults.buttonColors(Color.Gray),
+                    onClick = {
+                    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+                    try {
+                        val startDateTime = formatter.parse("$eventDate $eventStartTime")
+                        val endDateTime = formatter.parse("$eventDate $eventEndTime")
+                        if(startDateTime != null && endDateTime != null) {
+                            val intent = Intent(Intent.ACTION_INSERT).apply {
+                                data = CalendarContract.Events.CONTENT_URI
+                                putExtra(CalendarContract.Events.TITLE, eventTitle)
+                                putExtra(CalendarContract.Events.DESCRIPTION, eventDescription)
+                                putExtra(CalendarContract.Events.EVENT_LOCATION, eventLocation)
+                                putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startDateTime?.time)
+                                putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endDateTime?.time)
                             }
-                        },
-                        lembreteDao = lembreteDao
-                    )
-                }
-            }
-
-        }
-    )
-
-
-}
-
-@Composable
-fun ListaLembretes(lembretes: List<Lembrete>){
-    LazyColumn (
-        modifier = Modifier
-            .fillMaxSize()
-    ){
-        items(lembretes){
-                lembrete -> LembreteItem(lembrete)
-            Divider(color = Color.LightGray, thickness = 1.dp)
-        }
-    }
-}
-
-@Composable
-fun LembreteItem(lembrete: Lembrete) {
-    Column(
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        Text(text = lembrete.titulo, style = MaterialTheme.typography.titleMedium, color = Color.White)
-        Text(text = lembrete.data, style = MaterialTheme.typography.bodyMedium, color = Color.White)
-    }
-}
-
-@Composable
-fun AlertaAdd(
-    onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit,
-    lembreteDao: LembreteDao
-){
-    var titulo by remember { mutableStateOf("")}
-    var data by remember { mutableStateOf("")}
-
-    val coroutineScope = rememberCoroutineScope()
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text("Adicionar Lembrete")
-        },
-        text = {
-            Column {
-                TextField(
-                    value = titulo,
-                    onValueChange = { titulo = it },
-                    placeholder = { Text("Título") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                TextField(
-                    value = data,
-                    onValueChange = { data = it },
-                    placeholder = { Text("Data - yyyy-mm-dd")},
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                shape = RoundedCornerShape(15),
-                colors = ButtonDefaults.buttonColors(Color.Gray),
-                onClick = {
-                    val novoLembrete = Lembrete(
-                        data = data,
-                        titulo = titulo
-                    )
-                    coroutineScope.launch{
-                        lembreteDao.insert(novoLembrete)
-                        onConfirm()
+                            context.startActivity(intent)
+                        } else {
+                            Toast.makeText(context, "Formato de data ou hora inválido. Por favor insira uma data e hora válidas", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception){
+                        e.printStackTrace()
                     }
+                },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(text = "Adicionar Evento no Calendário",
+                        color = Color.White,
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        fontSize = 20.sp)
                 }
-            ) {
-                Text(text ="Adicionar",
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    fontSize = 20.sp)
-            }
-        },
-        dismissButton = {
-            Button(
-                shape = RoundedCornerShape(15),
-                colors = ButtonDefaults.buttonColors(Color.Gray),
-                onClick = { onDismissRequest() }
-            ) {
-                Text("Cancelar",
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    fontSize = 20.sp)
             }
         }
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewCalendarScreen() {
+    CalendarPage(navController = rememberNavController())
 }

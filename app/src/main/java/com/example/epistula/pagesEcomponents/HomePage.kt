@@ -1,5 +1,6 @@
 package com.example.epistula.pagesEcomponents
 
+import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,8 +24,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,48 +31,54 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import com.example.epistula.R
-import com.example.epistula.ui.theme.fontFamily
+import com.example.epistula.model.Email
+import com.example.epistula.model.SendEmail
+import com.example.epistula.service.ApiService
+import com.example.epistula.ui.theme.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomePage(navController: NavController) {
+fun HomePage(navController: NavController, apiService: ApiService) {
     var pesquisa by rememberSaveable { mutableStateOf("") }
     val placeholderPesquisa = "Pesquisar"
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-
-    // Lista de emails
-    val emails = listOf(
-        Email(
-            "Remetente 1",
-            "Título 1",
-            "Lorem ipsum dolor sit amet",
-            "11/06/2024",
-            "13:42",
-            "Lido"
-        ),
-        Email(
-            "Remetente 2",
-            "Título 2",
-            "Consectetur adipiscing elit",
-            "11/06/2024",
-            "14:42",
-            "Não lido"
-        ),
-        Email("Remetente 3", "Título 3", "Sed do eiusmod tempor", "12/06/2024", "10:00", "Spam")
-    )
+    var emails by remember { mutableStateOf<List<Email>>(emptyList())}
     var filteredEmails by remember { mutableStateOf(emails) }
     var filter by remember { mutableStateOf("Todos os emails") }
     var showSnackbar by remember { mutableStateOf(false) }
     var snackbarMessage by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false)}
+
+    LaunchedEffect(Unit){
+        scope.launch{
+            try{
+                emails = apiService.getEmails()
+                filteredEmails = emails
+            } catch (e: Exception) {
+                snackbarMessage = "Erro ao carregar os e-mails: ${e.message}"
+                showSnackbar = true
+            }
+        }
+    }
+
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val menu = if (currentTheme == "dark") R.drawable.icon_menu_d else R.drawable.icon_menu_l
+    val avatar = if (currentTheme == "dark") R.drawable.icon_person_d else R.drawable.icon_person_l
 
     fun updateFilteredEmails() {
         filteredEmails = emails.filter {
             (filter == "Todos os emails" || it.status == filter) &&
-                    (pesquisa.isBlank() || it.desc.contains(pesquisa, ignoreCase = true) ||
-                            it.remetente.contains(pesquisa, ignoreCase = true) ||
+                    (pesquisa.isBlank() || it.body.contains(pesquisa, ignoreCase = true) ||
+                            it.sender.contains(pesquisa, ignoreCase = true) ||
                             it.title.contains(pesquisa, ignoreCase = true))
         }
     }
@@ -94,11 +99,11 @@ fun HomePage(navController: NavController) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color(0xFF333333))
+                    .background(majorColors)
             ) {
                 Box(
                     modifier = Modifier
-                        .background(Color(0xFFA8A8A8))
+                        .background(textColors)
                         .padding(horizontal = 10.dp, vertical = 0.dp)
                 ) {
                     Row(
@@ -114,8 +119,9 @@ fun HomePage(navController: NavController) {
                             }
                         }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_menu),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = menu),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
@@ -126,13 +132,13 @@ fun HomePage(navController: NavController) {
                             onValueChange = { pesquisa = it },
                             placeholder = {
                                 if (pesquisa.isEmpty()) {
-                                    Text(placeholderPesquisa, color = Color.Black)
+                                    Text(placeholderPesquisa, color = majorColors)
                                 }
                             },
                             modifier = Modifier
                                 .weight(1f),
                             colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color(0xFFA7A7A7),
+                                containerColor = textColors,
                                 cursorColor = Color.Black,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
@@ -144,8 +150,9 @@ fun HomePage(navController: NavController) {
 
                         IconButton(onClick = { /* TODO: Menu click */ }) {
                             Icon(
-                                painter = painterResource(id = R.drawable.icon_person),
-                                contentDescription = "Menu"
+                                painter = painterResource(id = avatar),
+                                contentDescription = "Menu",
+                                tint = majorColors
                             )
                         }
 
@@ -165,29 +172,64 @@ fun HomePage(navController: NavController) {
                         }
                     }
                 }
-
-                // Email List
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(8.dp)
-                ) {
-                    items(filteredEmails.size) { index ->
-                        EmailItem(
-                            email = filteredEmails[index],
-                            onFavorite = {
-                                snackbarMessage =
-                                    "Email ${filteredEmails[index].title} de ${filteredEmails[index].remetente} favoritado"
-                                showSnackbar = true
-                            }
-                        )
-                        Divider(color = Color(0xFF272727), thickness = 1.dp)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    // Email List
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(8.dp)
+                    ) {
+                        items(filteredEmails.size) { index ->
+                            EmailItem(
+                                email = filteredEmails[index],
+                                onFavorite = {
+                                    snackbarMessage =
+                                        "Email ${filteredEmails[index].title} de ${filteredEmails[index].sender} favoritado"
+                                    showSnackbar = true
+                                }
+                            )
+                            Divider(color = Color(0xFF272727), thickness = 1.dp)
+                        }
+                    }
+                    Button(
+                        shape = RoundedCornerShape(15),
+                        colors = ButtonDefaults.buttonColors(Color.Gray),
+                        onClick = {showDialog = true},
+                        modifier = Modifier
+                            .padding(end = 16.dp, bottom = 48.dp)
+                            .align(Alignment.BottomEnd)
+                    ) {
+                        Text(text = "Enviar E-Mail",
+                            color = Color.White,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            fontSize = 20.sp)
                     }
                 }
             }
         }
     )
-
+    if(showDialog){
+        addEmail(
+            onDissmiss = { showDialog = false },
+            onSend = {recipient, title, body ->
+                scope.launch {
+                    try {
+                        val response = apiService.sendEmail(
+                            SendEmail(recipient, title, body)
+                        )
+                        if(response.isSuccessful){
+                            println("Email enviado com sucesso")
+                        } else {
+                            println("Falha ao enviar o Email: ${response.errorBody()?.toString()}")
+                        }
+                    } catch (e: Exception){
+                        println("Erro: ${e.message}")
+                    }
+                }
+                showDialog = false
+            }
+        )
+    }
     if (showSnackbar) {
         Box(
             modifier = Modifier
@@ -229,6 +271,15 @@ data class Email(
 
 @Composable
 fun EmailItem(email: Email, onFavorite: () -> Unit) {
+    val context = LocalContext.current
+    val sharedPreferences = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+    var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
+
+    val majorColors = if (currentTheme == "dark") DarkGray else LightGray
+    val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val eye = if (currentTheme == "dark") R.drawable.eye_d else R.drawable.eye_l
+    val arrw = if (currentTheme == "dark") R.drawable.icon_arrow_d else R.drawable.icon_arrow_l
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -238,10 +289,10 @@ fun EmailItem(email: Email, onFavorite: () -> Unit) {
     ) {
         Box(
             modifier = Modifier
-                .border(1.dp, Color(0x4DFFFFFF), shape = RoundedCornerShape(10.dp))
+                .border(1.dp, textColors, shape = RoundedCornerShape(10.dp))
         ) {
             Image(
-                painter = painterResource(id = R.drawable.eye),
+                painter = painterResource(id = eye),
                 contentDescription = "Email Icon",
                 modifier = Modifier.size(48.dp)
             )
@@ -251,28 +302,71 @@ fun EmailItem(email: Email, onFavorite: () -> Unit) {
                 .weight(1f)
                 .padding(horizontal = 8.dp)
         ) {
-            Text(email.remetente, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(email.sender, fontWeight = FontWeight.Bold, color = Color.White)
             Text(email.title, fontWeight = FontWeight.Bold, color = Color.White)
             Text(
-                email.desc,
+                email.body,
                 color = Color.Gray,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
 
-        Column(
-            horizontalAlignment = Alignment.End
-        ) {
-            Text(email.date, color = Color.Gray, fontSize = 12.sp)
-            Text(email.time, color = Color.Gray, fontSize = 12.sp)
-        }
+//        Column(
+//            horizontalAlignment = Alignment.End
+//        ) {
+//            Text(email.date, color = textColors, fontSize = 12.sp)
+//            Text(email.time, color = textColors, fontSize = 12.sp)
+//        }
     }
 }
 
-
-@Preview(showBackground = true)
 @Composable
-fun PreviewHomeScreen() {
-    HomePage(navController = rememberNavController())
+fun addEmail(
+    onDissmiss: () -> Unit,
+    onSend: (String, String, String) -> Unit
+){
+    var recipient by remember { mutableStateOf("")}
+    var title by remember { mutableStateOf("")}
+    var body by remember { mutableStateOf("")}
+
+    AlertDialog(
+        onDismissRequest = onDissmiss,
+        title = { Text("Enviar Email")},
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = recipient,
+                    onValueChange = {recipient = it},
+                    label = { Text("Destinatário")}
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = {title = it},
+                    label = { Text("Título do E-mail")}
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = body,
+                    onValueChange = {body = it},
+                    label = { Text("Conteúdo do E-mail")},
+                    modifier = Modifier.height(150.dp),
+                    maxLines = 5
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                onSend(recipient, title, body)
+            }) {
+                Text("Enviar")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDissmiss){
+                Text("Cancel")
+            }
+        }
+    )
 }

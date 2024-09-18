@@ -10,14 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.epistula.db.AppDataBase
+import com.example.epistula.objects.RetrofitClient
 import com.example.epistula.pagesEcomponents.CalendarPage
 import com.example.epistula.pagesEcomponents.HomePage
 import com.example.epistula.pagesEcomponents.LoginPage
 import com.example.epistula.pagesEcomponents.WelcomePage
+import com.example.epistula.service.ApiService
 import com.example.epistula.ui.theme.EpistulaTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var apiService: ApiService
+
     override fun onCreate(savedInstanceState: Bundle?) {
         loadAppTheme()
         super.onCreate(savedInstanceState)
@@ -28,14 +32,13 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     val navController = rememberNavController()
-                    val lembreteDao = AppDataBase.getDataBase(this).lembreteDao()
                     NavHost(
                         navController = navController,
                         startDestination = "calendario" ){
                         composable(route = "login"){ LoginPage(navController) }
                         composable(route = "bemvindo" ){ WelcomePage(navController) }
-                        composable(route = "home"){ HomePage(navController) }
-                        composable(route = "calendario"){ CalendarPage(navController, lembreteDao) }
+                        composable(route = "home"){ HomePage(navController, apiService) }
+                        composable(route = "calendario"){ CalendarPage(navController) }
                 }
             }
         }

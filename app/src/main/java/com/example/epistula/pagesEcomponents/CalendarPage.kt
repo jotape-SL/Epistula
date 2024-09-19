@@ -42,6 +42,7 @@ fun CalendarPage(navController: NavController) {
     var currentTheme by remember { mutableStateOf(sharedPreferences.getString("app_theme", "light")) }
     val majorColors = if (currentTheme == "dark") DarkGray else LightGray
     val textColors = if (currentTheme == "dark") LightGray else DarkGray
+    val blackNwhite = if (currentTheme == "dark") Color.White else Color.Black
     val menu = if (currentTheme == "dark") R.drawable.icon_menu_d else R.drawable.icon_menu_l
     val avatar = if (currentTheme == "dark") R.drawable.icon_person_d else R.drawable.icon_person_l
 
@@ -130,9 +131,9 @@ fun CalendarPage(navController: NavController) {
                 TextField(
                     value = eventTitle,
                     onValueChange = {eventTitle = it},
-                    label = { Text("Título do Evento")},
+                    label = { Text("Título do Evento", color = majorColors)},
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFFF),
+                        containerColor = textColors,
                         focusedIndicatorColor = majorColors
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -141,9 +142,9 @@ fun CalendarPage(navController: NavController) {
                 TextField(
                     value = eventDescription,
                     onValueChange = {eventDescription = it},
-                    label = { Text("Descrição do Evento")},
+                    label = { Text("Descrição do Evento", color = majorColors)},
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFFF),
+                        containerColor = textColors,
                         focusedIndicatorColor = Color(0xFF464646)
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -152,9 +153,9 @@ fun CalendarPage(navController: NavController) {
                 TextField(
                     value = eventLocation,
                     onValueChange = {eventLocation = it},
-                    label = { Text("Local do Evento")},
+                    label = { Text("Local do Evento", color = majorColors)},
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFFF),
+                        containerColor = textColors,
                         focusedIndicatorColor = Color(0xFF464646)
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -163,10 +164,10 @@ fun CalendarPage(navController: NavController) {
                 TextField(
                     value = eventDate,
                     onValueChange = {eventDate = it},
-                    label = { Text("Data do Evento")},
+                    label = { Text("Data do Evento", color = majorColors)},
                     placeholder = { Text(" dd/MM/yyyy")},
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFFF),
+                        containerColor = textColors,
                         focusedIndicatorColor = Color(0xFF464646)
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -175,21 +176,22 @@ fun CalendarPage(navController: NavController) {
                 TextField(
                     value = eventStartTime,
                     onValueChange = {eventStartTime = it},
-                    label = { Text("Horário de Início do Evento")},
+                    label = { Text("Horário de Início do Evento", color = majorColors)},
                     placeholder = { Text(" HH:mm")},
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFFF),
+                        containerColor = textColors,
                         focusedIndicatorColor = Color(0xFF464646)
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = eventEndTime,
                     onValueChange = {eventEndTime = it},
-                    label = { Text("Horário de Término do Evento")},
+                    label = { Text("Horário de Término do Evento", color = majorColors)},
                     placeholder = { Text(" HH:mm")},
                     colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color(0xFFFFFFFF),
+                        containerColor = textColors,
                         focusedIndicatorColor = Color(0xFF464646)
                     ),
                     modifier = Modifier.fillMaxWidth()
@@ -197,7 +199,7 @@ fun CalendarPage(navController: NavController) {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     shape = RoundedCornerShape(15),
-                    colors = ButtonDefaults.buttonColors(Color.Gray),
+                    colors = ButtonDefaults.buttonColors(textColors),
                     onClick = {
                     val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
                     try {

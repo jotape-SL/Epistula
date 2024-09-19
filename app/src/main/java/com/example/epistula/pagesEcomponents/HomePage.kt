@@ -311,13 +311,6 @@ fun EmailItem(email: Email, onFavorite: () -> Unit) {
                 overflow = TextOverflow.Ellipsis
             )
         }
-
-//        Column(
-//            horizontalAlignment = Alignment.End
-//        ) {
-//            Text(email.date, color = textColors, fontSize = 12.sp)
-//            Text(email.time, color = textColors, fontSize = 12.sp)
-//        }
     }
 }
 
